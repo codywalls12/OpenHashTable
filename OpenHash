@@ -1,0 +1,171 @@
+//open hashing
+//using a string as the key
+#include <iostream>
+#include <stdlib.h>
+#include <list>
+#include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <vector>
+using namespace std;
+
+class HashT{
+	private:
+		static const int tableSize = 23;
+		struct item{
+			//string as the key (for extra credit)
+			string key, value;
+			//accouting for collisions (pointing to next item in the same bucket)
+			item * next;
+		};
+		item * HashTable[tableSize];
+	public:
+		//constructor
+		HashT();
+		int HashFunction(string key);
+		void addItem(string key, string value);
+		void searchItem(string key);
+		void deleteItem(string key);
+		void printTable();
+}; 
+HashT :: HashT(){
+	//constructor
+	for(int i = 0; i < tableSize; i++){
+		HashTable[i] = new item;
+		HashTable[i]->key = "empty";
+		HashTable[i]->value = "empty";
+		HashTable[i]->next = NULL;
+	}
+}
+int HashT :: HashFunction(string key){
+	int hash = 0;
+	int index;
+	for(int i = 0; i < key.length(); i++){
+		// gotta make sure its prime when hashing !!
+		hash = (hash + (int)key[i]) * 8;
+	}
+	//module type hashing
+	index = hash % tableSize;
+	return index;
+}
+void HashT :: addItem(string key, string value){
+	int index = HashFunction(key);
+	//checking if its empty or not
+	if(HashTable[index]->key == "empty"){
+		HashTable[index]->key = key;
+		HashTable[index]->value = value;
+	}
+	else{
+		item * Ptr = HashTable[index];
+		item * newBucket = new item;
+		newBucket->key = key;
+		newBucket->value = value;
+		HashTable[index]->next = NULL;
+		while(Ptr->next != NULL){
+			Ptr = Ptr->next;
+		}
+		Ptr->next = newBucket;
+	}
+}
+void HashT :: searchItem(string key){
+	int index = HashFunction(key);
+	bool foundKey = false;
+	string value;
+	item * Ptr = HashTable[index];
+	while(Ptr != NULL){
+		if(Ptr->key == key){
+			foundKey = true;
+			value = Ptr->value;
+		}
+		Ptr = Ptr->next;
+	}
+	if(foundKey == true){
+		//means we found the key duh
+		cout << key << " [VALUE] - [" << value << "]" << endl;
+	}
+	else{
+		cout << "no information for [" << key << "]" << endl;
+	}
+}
+void HashT :: deleteItem(string key){
+	int index = HashFunction(key);
+	item * delPtr;
+	if(HashTable[index]->key == "empty"){
+		cout << key << " is not in this table, try another <3" << endl;
+	}
+	else if(HashTable[index]->key == key){
+		delPtr = HashTable[index];
+		HashTable[index] = HashTable[index]->next;
+		delete delPtr;
+		cout << "[" << key << "] has been removed" << endl;
+	}
+}
+void HashT :: printTable(){
+	for(int i = 0; i < tableSize; i++){
+		cout << "index: " << i << endl;
+		cout << HashTable[i]->key << endl;
+		cout << HashTable[i]->value << endl;
+	}
+}
+int main(){
+	HashT hashTable;
+	string addedKEY;
+	string addedVALUE;
+	int choice;
+	string key;
+	string value;
+	//vector<string> KEYV;
+	//vector<string> VALUEV;
+	string removedKEY;
+	string searchedKEY;
+	
+	do{
+		cout << endl;
+		cout << "1 - add key" << endl;
+		cout << "2 - remove key" << endl;
+		cout << "3 - search key" << endl;
+		cout << "4 - print table" << endl;
+		cout << "5 - exit" << endl;
+		cin >> choice;
+		switch(choice){
+			case 1:
+				cout << "[ADD KEY]" << endl;
+				cin.ignore();
+				getline(cin, addedKEY);
+				cout << "[ADD VALUE]" << endl;
+				cin.ignore();
+				getline(cin, addedVALUE);
+				cout << "added new info" << endl;
+				hashTable.addItem(addedKEY, addedVALUE);
+				break;
+			case 2:
+				cout << "[REMOVE KEY]" << endl;
+				cin.ignore();
+				getline(cin, removedKEY);
+				cout << "Key has been removed" << endl;
+				hashTable.deleteItem(removedKEY);
+				break;
+			case 3:
+				cout << "[SEARCH KEY]" << endl;
+				cin.ignore();
+				getline(cin, searchedKEY);
+				hashTable.searchItem(searchedKEY);
+				break;
+			case 4:
+				cout << "[PRINT TABLE" << endl;
+				hashTable.printTable();
+				break;
+			case 5:
+				cout << "[EXIT]" << endl;
+				break;
+			default:
+				cout << "[INVALID INPUT]" << endl;
+				break;
+		}
+		
+	}
+	while(choice != 5);
+	
+	return 0;
+}
